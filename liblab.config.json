@@ -1,40 +1,63 @@
 {
-  "sdkName": "test-sdk",
-  "apiVersion": "1.0.0",
-  "apiName": "test-api",
-  "specFilePath": "spec.json",
-  "languages": [
-    "csharp",
-    "go",
-    "python",
-    "typescript"
-  ],
-  "createDocs": false,
+  "sdkName": "Celitech",
+  "apiName": "Celitech",
+  "apiVersion": "1.1.88",
+  "specFilePath": "swagger.yaml",
+  "languages": ["java"],
+  "docs": ["api", "snippets", "enhancedApiSpec"],
+  "integrations": {
+    "enhancedApiSpec": {
+      "provider": "redocly",
+      "githubRepoName": "CelitechCoreAPIReference",
+      "redocly": {
+        "openapiPath": "swagger.yaml"
+      }
+    }
+  },
+  "customizations": {
+    "devContainer": true,
+    "generateEnv": true,
+    "inferServiceNames": false,
+    "includeOptionalSnippetParameters": false,
+    "injectedModels": [],
+    "license": {
+      "type": "MIT"
+    },
+    "responseHeaders": false,
+    "retry": {
+      "enabled": true,
+      "maxAttempts": 3,
+      "retryDelay": 150
+    },
+    "environmentVariables": [
+      {
+        "name": "CLIENT_ID",
+        "description": "Client ID parameter"
+      },
+      {
+        "name": "CLIENT_SECRET",
+        "description": "Client Secret parameter"
+      }
+    ]
+  },
   "languageOptions": {
-    "python": {
+    "java": {
+      "githubRepoName": "JavaRepoTest",
+      "sdkVersion": "1.1.88",
       "liblabVersion": "2",
-      "pypiPackageName": "petstore-sdk",
-      "githubRepoName": "",
-      "sdkVersion": "1.0.0"
-    },
-    "typescript": {
-      "npmName": "petstore-sdk",
-      "npmOrg": "",
-      "githubRepoName": "",
-      "sdkVersion": "1.0.0"
-    },
-    "go": {
-      "goModuleName": "github.com/swagger-api/swagger-petstore",
-      "githubRepoName": "",
-      "sdkVersion": "1.0.0"
-    },
-    "csharp": {
-      "githubRepoName": "",
-      "sdkVersion": "1.0.0",
-      "packageId": "Petstore.SDK"
+      "additionalConstructorParameters": [
+        {
+          "name": "clientId",
+          "example": "client-id"
+        },
+        {
+          "name": "clientSecret",
+          "example": "client-secret"
+        }
+      ]
     }
   },
   "publishing": {
-    "githubOrg": ""
+    "githubOrg": "elmasrisaer"
   }
 }
