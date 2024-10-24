@@ -4,7 +4,7 @@
   "apiVersion": "1.1.88",
   "specFilePath": "swagger.yaml",
   "languages": ["java"],
-  "docs": ["api", "snippets", "enhancedApiSpec"],
+  "docs": ["snippets"],
   "integrations": {
     "enhancedApiSpec": {
       "provider": "redocly",
