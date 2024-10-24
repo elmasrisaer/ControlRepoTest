@@ -3,7 +3,7 @@
   "apiName": "Celitech",
   "apiVersion": "1.1.88",
   "specFilePath": "swagger.yaml",
-  "languages": ["java"],
+  "languages": ["java", "typescript"],
   "docs": ["snippets"],
   "integrations": {
     "enhancedApiSpec": {
