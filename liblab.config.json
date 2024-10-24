@@ -3,17 +3,8 @@
   "apiName": "Celitech",
   "apiVersion": "1.1.88",
   "specFilePath": "swagger.yaml",
-  "languages": ["java", "typescript"],
+  "languages": ["java"],
   "docs": ["snippets"],
-  "integrations": {
-    "enhancedApiSpec": {
-      "provider": "redocly",
-      "githubRepoName": "CelitechCoreAPIReference",
-      "redocly": {
-        "openapiPath": "swagger.yaml"
-      }
-    }
-  },
   "customizations": {
     "devContainer": true,
     "generateEnv": true,
