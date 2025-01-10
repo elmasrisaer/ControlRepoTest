@@ -1,7 +1,7 @@
 {
   "sdkName": "Celitech",
   "apiName": "Celitech",
-  "apiVersion": "1.0.2",
+  "apiVersion": "1.0.3",
   "specFilePath": "swagger.yaml",
   "languages": ["go"],
   "docs": ["snippets"],
@@ -14,11 +14,6 @@
     "injectedModels": [],
     "license": {
       "type": "MIT"
-    },
-    "authentication": {
-      "oauth": {
-        "enabled": true
-      }
     },
     "responseHeaders": false,
     "retry": {
@@ -40,7 +35,7 @@
   "languageOptions": {
     "go": {
       "githubRepoName": "GoSDKTest",
-      "sdkVersion": "1.0.2",
+      "sdkVersion": "1.0.3",
       "liblabVersion": "2",
       "goModuleName": "github.com/elmasrisaer/GoSDKTest"
     }
