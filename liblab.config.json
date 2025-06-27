@@ -3,7 +3,10 @@
   "apiName": "Celitech",
   "apiVersion": "1.0.7",
   "specFilePath": "swagger.yaml",
-  "languages": ["go", "csharp"],
+  "languages": [
+    "csharp",
+    "go"
+  ],
   "docs": ["snippets"],
   "auth": ["oauth"],
   "customizations": {
