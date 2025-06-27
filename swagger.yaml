@@ -301,24 +301,6 @@ paths:
             format: date
             example: 2023-11-20
         - in: query
-          name: dataLimitInGB
-          description: |
-            Size of the package in GB.
-            
-            For **limited packages**, the available options are: **0.5, 1, 2, 3, 5, 8, 20GB**.
-            
-            For **unlimited packages** (available to Region-3), please use **-1** as an identifier.
-          schema:
-            type: number
-            example: 7
-        - in: query
-          name: includeUnlimited
-          description:
-            A boolean flag to include the **unlimited packages** in the response. The flag is false by default.
-          schema:
-            type: boolean
-            example: false
-        - in: query
           name: afterCursor
           description:
             To get the next batch of results, use this parameter. It tells the
@@ -387,8 +369,7 @@ paths:
                         dataLimitInBytes:
                           type: number
                           example: 1073741824
-                          description: |  
-                            Size of the package in bytes. For **limited packages**, this field will return the data limit in bytes. For **unlimited packages**, it will return **-1** as an identifier.
+                          description: Size of the package in Bytes
                         minDays:
                           type: number
                           example: 0
@@ -592,12 +573,17 @@ paths:
                 dataLimitInGB:
                   type: number
                   example: 1
-                  description: |
-                    Size of the package in GB.
-                    
-                    For **limited packages**, the available options are: **0.5, 1, 2, 3, 5, 8, 20GB** (supports `duration` or `startDate` / `endDate`).
-
-                    For **unlimited packages** (available to Region-3), please use **-1** as an identifier (supports `duration` only).
+                  description: Size of the package in GB. The available options are 0.5, 1, 2, 3, 5, 8, 20GB
+                startDate:
+                  type: string
+                  format: date
+                  example: 2023-11-01
+                  description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
+                endDate:
+                  type: string
+                  format: date
+                  example: 2023-11-20
+                  description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
                 quantity:
                   type: number
                   example: 1
@@ -623,31 +609,9 @@ paths:
               required:
                 - destination
                 - dataLimitInGB
+                - startDate
+                - endDate
                 - quantity
-              oneOf:
-                - required: [startDate, endDate]
-                  properties:
-                    startDate:
-                      type: string
-                      format: date
-                      example: '2023-11-01'
-                      description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
-                    endDate:
-                      type: string
-                      format: date
-                      example: '2023-11-20'
-                      description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
-                - required: [duration]
-                  properties:
-                    duration:
-                      type: number
-                      example: 7
-                      description: |
-                        It designates the number of days the eSIM is valid for within the 90-day validity period from the issuance date.  
-                        
-                        For **limited packages**, the supported durations are: **1, 2, 7, 14, 30, 90 days**.  
-                        
-                        For **unlimited packages**, all durations are supported **except 90 days**.
       responses:
         "200":
           description: Successful Response
@@ -956,8 +920,7 @@ paths:
                   type: number
                   example: 1
                   description:
-                    Size of the package in GB. The available options are 0.5, 1, 2, 3, 5, 8,
-                    20GB
+                    Size of the package in GB. The available options are 0.5, 1, 2, 3, 5, 8, 20GB
                 startDate:
                   type: string
                   format: date
@@ -1038,7 +1001,6 @@ paths:
                         example: 6cf19d46-b545-4029-a46b-cdeba22b6957
                         description: ID of the package
                       startDate:
-                        nullable: true
                         type: string
                         format: date-time
                         example: 2023-11-01T00:00:00+02:00
@@ -1046,7 +1008,6 @@ paths:
                           Start date of the package's validity in the format
                           'yyyy-MM-ddThh:mm:ssZZ'
                       endDate:
-                        nullable: true
                         type: string
                         format: date-time
                         example: 2023-11-20T23:59:59+02:00
@@ -1059,12 +1020,10 @@ paths:
                         example: 2023-10-20T00:00:00+00:00
                         description: Creation date of the purchase in the format 'yyyy-MM-ddThh:mm:ssZZ'
                       startTime:
-                        nullable: true
                         deprecated: true
                         type: number
                         description: Epoch value representing the start time of the package's validity
                       endTime:
-                        nullable: true
                         deprecated: true
                         type: number
                         description: Epoch value representing the end time of the package's validity
@@ -1414,7 +1373,6 @@ paths:
                           example: 4973fa15-6979-4daa-9cf3-672620df819c
                           description: ID of the purchase
                         startDate:
-                          nullable: true
                           type: string
                           format: date-time
                           example: 2023-11-01T00:00:00+02:00
@@ -1422,31 +1380,22 @@ paths:
                             Start date of the package's validity in the format
                             'yyyy-MM-ddThh:mm:ssZZ'
                         endDate:
-                          nullable: true
                           type: string
                           format: date-time
                           example: 2023-11-20T23:59:59+02:00
                           description:
                             End date of the package's validity in the format
                             'yyyy-MM-ddThh:mm:ssZZ'
-                        duration:
-                          nullable: true
-                          type: number
-                          example: 7
-                          description:
-                            It designates the number of days the eSIM is valid for within 90-day validity from issuance date.
                         createdDate:
                           type: string
                           format: date-time
                           example: 2023-10-20T00:00:00+00:00
                           description: Creation date of the purchase in the format 'yyyy-MM-ddThh:mm:ssZZ'
                         startTime:
-                          nullable: true
                           deprecated: true
                           type: number
                           description: Epoch value representing the start time of the package's validity
                         endTime:
-                          nullable: true
                           deprecated: true
                           type: number
                           description: Epoch value representing the end time of the package's validity
@@ -1464,8 +1413,7 @@ paths:
                             dataLimitInBytes:
                               type: number
                               example: 1073741824
-                              description: |
-                                Size of the package in bytes. For **limited packages**, this field will return the data limit in bytes. For **unlimited packages**, it will return **-1** as an identifier.
+                              description: Size of the package in Bytes
                             destination:
                               type: string
                               example: FRA
@@ -1694,19 +1642,30 @@ paths:
               properties:
                 iccid:
                   type: string
-                  example: '1111222233334444555000'
+                  example: "1111222233334444555000"
                   description: ID of the eSIM
                   minLength: 18
                   maxLength: 22
                 dataLimitInGB:
                   type: number
                   example: 1
-                  description: |
-                    Size of the package in GB.
-                    
-                    For **limited packages**, the available options are: **0.5, 1, 2, 3, 5, 8, 20GB** (supports `duration` or `startDate` / `endDate`).
-                    
-                    For **unlimited packages** (available to Region-3), please use **-1** as an identifier (supports `duration` only).
+                  description:
+                    Size of the package in GB. The available options are 0.5, 1, 2, 3, 5, 8, 20GB
+                startDate:
+                  type: string
+                  format: date
+                  example: 2023-11-01
+                  description:
+                    Start date of the package's validity in the format 'yyyy-MM-dd'.
+                    This date can be set to the current day or any day within
+                    the next 12 months.
+                endDate:
+                  type: string
+                  format: date
+                  example: 2023-11-20
+                  description:
+                    End date of the package's validity in the format 'yyyy-MM-dd'. End
+                    date can be maximum 90 days after Start date.
                 email:
                   type: string
                   example: example@domain.com
@@ -1730,30 +1689,8 @@ paths:
               required:
                 - iccid
                 - dataLimitInGB
-              oneOf:
-                - required: [startDate, endDate]
-                  properties:
-                    startDate:
-                      type: string
-                      format: date
-                      example: '2023-11-01'
-                      description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
-                    endDate:
-                      type: string
-                      format: date
-                      example: '2023-11-20'
-                      description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
-                - required: [duration]
-                  properties:
-                    duration:
-                      type: number
-                      example: 7
-                      description: |
-                        It designates the number of days the eSIM is valid for within the 90-day validity period from the issuance date.  
-                        
-                        For **limited packages**, the supported durations are: **1, 2, 7, 14, 30, 90 days**.  
-                        
-                        For **unlimited packages**, all durations are supported **except 90 days**.
+                - startDate
+                - endDate
       responses:
         "200":
           description: Successful Response
@@ -1774,7 +1711,6 @@ paths:
                         example: 6cf19d46-b545-4029-a46b-cdeba22b6957
                         description: ID of the package
                       startDate:
-                        nullable: true
                         type: string
                         format: date-time
                         example: 2023-11-01T00:00:00+02:00
@@ -1782,31 +1718,22 @@ paths:
                           Start date of the package's validity in the format
                           'yyyy-MM-ddThh:mm:ssZZ'
                       endDate:
-                        nullable: true
                         type: string
                         format: date-time
                         example: 2023-11-20T23:59:59+02:00
                         description:
                           End date of the package's validity in the format
                           'yyyy-MM-ddThh:mm:ssZZ'
-                      duration:
-                        nullable: true
-                        type: number
-                        example: 7
-                        description:
-                          It designates the number of days the eSIM is valid for within 90-day validity from issuance date.
                       createdDate:
                         type: string
                         format: date-time
                         example: 2023-10-20T00:00:00+00:00
                         description: Creation date of the purchase in the format 'yyyy-MM-ddThh:mm:ssZZ'
                       startTime:
-                        nullable: true
                         deprecated: true
                         type: number
                         description: Epoch value representing the start time of the package's validity
                       endTime:
-                        nullable: true
                         deprecated: true
                         type: number
                         description: Epoch value representing the end time of the package's validity
@@ -2058,7 +1985,7 @@ paths:
         with a future activation start time. Editing can only be performed for
         packages that have not been activated, and it cannot change the package
         size. The modification must not change the package duration category to
-        ensure pricing consistency. Duration based packages cannot be edited.
+        ensure pricing consistency.
       operationId: editPurchase
       tags:
         - Purchases
@@ -2118,7 +2045,6 @@ paths:
                     example: ae471106-c8b4-42cf-b83a-b061291f2922
                     description: ID of the purchase
                   newStartDate:
-                    nullable: true
                     type: string
                     format: date-time
                     example: 2023-11-01T00:00:00+02:00
@@ -2126,7 +2052,6 @@ paths:
                       Start date of the package's validity in the format
                       'yyyy-MM-ddThh:mm:ssZZ'
                   newEndDate:
-                    nullable: true
                     type: string
                     format: date-time
                     example: 2023-11-20T23:59:59+02:00
@@ -2134,14 +2059,12 @@ paths:
                       End date of the package's validity in the format
                       'yyyy-MM-ddThh:mm:ssZZ'
                   newStartTime:
-                    nullable: true
                     deprecated: true
                     type: number
                     description:
                       Epoch value representing the new start time of the package's
                       validity
                   newEndTime:
-                    nullable: true
                     deprecated: true
                     type: number
                     description: Epoch value representing the new end time of the package's validity
@@ -2397,10 +2320,7 @@ paths:
                   dataUsageRemainingInBytes:
                     type: number
                     example: 1073741824
-                    description: |
-                      Remaining balance of the package in byte. 
-                      For **limited packages**, this field indicates the remaining data in bytes. 
-                      For **unlimited packages**, it will return **-1** as an identifier.
+                    description: Remaining balance of the package in bytes
                   status:
                     type: string
                     example: ACTIVE
