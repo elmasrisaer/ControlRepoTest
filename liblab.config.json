@@ -47,8 +47,7 @@
     "csharp": {
       "githubRepoName": "CSharpSDKTest",
       "sdkVersion": "1.0.0",
-      "liblabVersion": "2",
-      "goModuleName": "github.com/elmasrisaer/CSharpSDKTest"
+      "liblabVersion": "2"
     }
   },
   "publishing": {
