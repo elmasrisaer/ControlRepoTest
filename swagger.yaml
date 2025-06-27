@@ -5,41 +5,18 @@ info:
   contact:
     name: CELITECH
     email: support@celitech.com
-  description: |-
+  description: |
     Welcome to the CELITECH API documentation!
-      
-      Useful links: [Homepage](https://www.celitech.com) | [Support email](mailto:support@celitech.com) | [Blog](https://www.celitech.com/blog/)
 
-      # Introduction
+    Useful links: [Homepage](https://www.celitech.com) | [Support email](mailto:support@celitech.com) | [Blog](https://www.celitech.com/blog/)
 
-      This guide is your go-to resource for the CELITECH API, with full documentation and schemas.
-
-      Need help? Email us at support@celitech.com.
-
-      "Partners" refers to online service providers that use our eSIM API. Access levels include Gold, Platinum, and Diamond.
-
-      ## API
-
-      The CELITECH API is designed for use by partner platforms, including both web and mobile applications. It's assumed all endpoint calls are initiated from the backend of an integrated platform.
-
-      API URL: `https://api.celitech.net/v1`
-
-      ## Authentication & Authorization
-      CELITECH API uses the OAuth 2.0 protocol for authentication and authorization.
-      The endpoints are protected using client credentials flow which is based on a token exchange. The token has a defined life span (typically 1 hour), after which a new token must be obtained.
-
-      To begin, obtain OAuth 2.0 client credentials ( **CLIENT_ID** & **CLIENT_SECRET** ) from the [CELITECH Dashboard](https://www.dashboard.celitech.com/). Then your client application requests an access token from the CELITECH Authorization Server, extracts a token from the response, and sends the token to the CELITECH API that you want to access.
-
-      Security Scheme Type: `OAuth2`
-
-      Flow type: `clientCredentials`
-
-      Token URL: `https://auth.celitech.net/oauth2/token`
   x-logo:
     url: /logo.png
     altText: CELITECH API
+
 servers:
   - url: https://api.celitech.net/v1
+
 components:
   securitySchemes:
     oAuth2ClientCredentials:
@@ -48,9 +25,49 @@ components:
         clientCredentials:
           tokenUrl: https://auth.celitech.net/oauth2/token
           scopes: {}
+
 security:
   - oAuth2ClientCredentials: []
+
 paths:
+  /oauth2/token:
+    post:
+      tags:
+        - OAuth
+      summary: Get Access Token
+      operationId: getAccessToken
+      description: This endpoint was added by liblab
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  enum:
+                    - client_credentials
+                  example: client_credentials
+                client_id:
+                  type: string
+                client_secret:
+                  type: string
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                  expires_in:
+                    type: integer
+
   /destinations:
     get:
       summary: List Destinations
@@ -59,7 +76,7 @@ paths:
       tags:
         - Destinations
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -85,8 +102,14 @@ paths:
                             - France
                           items:
                             type: string
-                          description: This array indicates the geographical area covered by a specific destination. If the destination represents a single country, the array will include that country. However, if the destination represents a broader regional scope, the array will be populated with the names of the countries belonging to that region.
-        '400':
+                          description:
+                            This array indicates the geographical area covered by a specific
+                            destination. If the destination represents a single
+                            country, the array will include that country.
+                            However, if the destination represents a broader
+                            regional scope, the array will be populated with the
+                            names of the countries belonging to that region.
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -97,7 +120,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -109,61 +132,63 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X GET \
+              https://api.celitech.net/v1/destinations \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const { data } = await celitech.destinations.listDestinations();
+            using System.Threading.Tasks;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            public class Program
 
-              const { data } = await celitech.destinations.listDestinations();
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                var request = await client.GetAsync("https://api.celitech.net/v1/destinations");
+                var response = await request.Content.ReadAsStringAsync();
 
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->destinations->listDestinations();
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.ListDestinationsOkResponse;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                ListDestinationsOkResponse response = celitech.destinations.listDestinations();
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/destinations";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname ))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -186,18 +211,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.destinations.list_destinations()
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -215,32 +228,45 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
+        - source: |-
+            import { Celitech } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                var request = await client.GetAsync("https://api.celitech.net/v1/destinations");
-                var response = await request.Content.ReadAsStringAsync();
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              https://api.celitech.net/v1/destinations \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+              const { data } = await celitech.destinations.listDestinations();
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->destinations->listDestinations();
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.destinations.list_destinations()
+
+            print(result)
+          lang: Python
   /packages:
     get:
       summary: List Packages
@@ -257,50 +283,88 @@ paths:
             example: FRA
         - in: query
           name: startDate
-          description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
+          description:
+            Start date of the package's validity in the format 'yyyy-MM-dd'.
+            This date can be set to the current day or any day within the next
+            12 months.
           schema:
             type: string
             format: date
-            example: '2023-11-01'
+            example: 2023-11-01
         - in: query
           name: endDate
-          description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
+          description:
+            End date of the package's validity in the format 'yyyy-MM-dd'. End
+            date can be maximum 90 days after Start date.
           schema:
             type: string
             format: date
-            example: '2023-11-20'
+            example: 2023-11-20
+        - in: query
+          name: dataLimitInGB
+          description: |
+            Size of the package in GB.
+            
+            For **limited packages**, the available options are: **0.5, 1, 2, 3, 5, 8, 20GB**.
+            
+            For **unlimited packages** (available to Region-3), please use **-1** as an identifier.
+          schema:
+            type: number
+            example: 7
+        - in: query
+          name: includeUnlimited
+          description:
+            A boolean flag to include the **unlimited packages** in the response. The flag is false by default.
+          schema:
+            type: boolean
+            example: false
         - in: query
           name: afterCursor
-          description: To get the next batch of results, use this parameter. It tells the API where to start fetching data after the last item you received. It helps you avoid repeats and efficiently browse through large sets of data.
+          description:
+            To get the next batch of results, use this parameter. It tells the
+            API where to start fetching data after the last item you received.
+            It helps you avoid repeats and efficiently browse through large sets
+            of data.
           schema:
             type: string
             example: Y3JlYXRlZEF0OjE1OTk0OTMwOTgsZGVzdGluYXRpb246QVVTLG1pbkRheXM6MCxkYXRhTGltaXRJbkJ5dGVzOjUzNjg3MDkxMjA
         - in: query
           name: limit
-          description: Maximum number of packages to be returned in the response. The value must be greater than 0 and less than or equal to 160. If not provided, the default value is 20
+          description:
+            Maximum number of packages to be returned in the response. The
+            value must be greater than 0 and less than or equal to 160. If not
+            provided, the default value is 20
           schema:
             type: number
             example: 20
         - in: query
           name: startTime
           deprecated: true
-          description: Epoch value representing the start time of the package's validity. This timestamp can be set to the current time or any time within the next 12 months
+          description:
+            Epoch value representing the start time of the package's validity.
+            This timestamp can be set to the current time or any time within the
+            next 12 months
           schema:
             type: integer
         - in: query
           name: endTime
           deprecated: true
-          description: Epoch value representing the end time of the package's validity. End time can be maximum 90 days after Start time
+          description:
+            Epoch value representing the end time of the package's validity.
+            End time can be maximum 90 days after Start time
           schema:
             type: integer
         - in: query
           name: duration
           deprecated: true
-          description: Duration in seconds for the package's validity. If this parameter is present, it will override the startTime and endTime parameters. The maximum duration for a package's validity period is 90 days
+          description:
+            Duration in seconds for the package's validity. If this parameter
+            is present, it will override the startTime and endTime parameters.
+            The maximum duration for a package's validity period is 90 days
           schema:
             type: number
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -319,11 +383,12 @@ paths:
                         destination:
                           type: string
                           example: FRA
-                          description: ISO representation of the package's destination
+                          description: ISO representation of the package's destination.
                         dataLimitInBytes:
                           type: number
                           example: 1073741824
-                          description: Size of the package in Bytes
+                          description: |  
+                            Size of the package in bytes. For **limited packages**, this field will return the data limit in bytes. For **unlimited packages**, it will return **-1** as an identifier.
                         minDays:
                           type: number
                           example: 0
@@ -339,9 +404,15 @@ paths:
                   afterCursor:
                     type: string
                     example: Y3JlYXRlZEF0OjE1OTk0OTMwOTgsZGVzdGluYXRpb246QVVTLG1pbkRheXM6MCxkYXRhTGltaXRJbkJ5dGVzOjUzNjg3MDkxMjA
-                    description: The cursor value representing the end of the current page of results. Use this cursor value as the "afterCursor" parameter in your next request to retrieve the subsequent page of results. It ensures that you continue fetching data from where you left off, facilitating smooth pagination
+                    description:
+                      The cursor value representing the end of the current page of
+                      results. Use this cursor value as the "afterCursor"
+                      parameter in your next request to retrieve the subsequent
+                      page of results. It ensures that you continue fetching
+                      data from where you left off, facilitating smooth
+                      pagination
                     nullable: true
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -352,7 +423,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -364,62 +435,63 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X GET \
+              https://api.celitech.net/v1/packages \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const { data } = await celitech.packages.listPackages({});
+            using System.Threading.Tasks;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            public class Program
 
-              const { data } = await celitech.packages.listPackages({});
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                var request = await client.GetAsync("https://api.celitech.net/v1/packages");
+                var response = await request.Content.ReadAsStringAsync();
 
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->packages->listPackages();
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.ListPackagesOkResponse;
-            import io.github.celitech.celitechsdk.models.ListPackagesParameters;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                ListPackagesOkResponse response = celitech.packages.listPackages();
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/packages";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname ))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -442,18 +514,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.packages.list_packages()
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -471,32 +531,46 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
+        - source: |-
+            import { Celitech } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                var request = await client.GetAsync("https://api.celitech.net/v1/packages");
-                var response = await request.Content.ReadAsStringAsync();
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              https://api.celitech.net/v1/packages \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+              const { data } = await celitech.packages.listPackages({});
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->packages->listPackages();
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.packages.list_packages()
+
+            print(result)
+          lang: Python
+
   /purchases/v2:
     post:
       summary: Create Purchase V2
@@ -514,21 +588,16 @@ paths:
                 destination:
                   type: string
                   example: FRA
-                  description: ISO representation of the package's destination
+                  description: ISO representation of the package's destination.
                 dataLimitInGB:
                   type: number
                   example: 1
-                  description: Size of the package in GB. The available options are 1, 2, 3, 5, 8, 20GB
-                startDate:
-                  type: string
-                  format: date
-                  example: '2023-11-01'
-                  description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
-                endDate:
-                  type: string
-                  format: date
-                  example: '2023-11-20'
-                  description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
+                  description: |
+                    Size of the package in GB.
+                    
+                    For **limited packages**, the available options are: **0.5, 1, 2, 3, 5, 8, 20GB** (supports `duration` or `startDate` / `endDate`).
+
+                    For **unlimited packages** (available to Region-3), please use **-1** as an identifier (supports `duration` only).
                 quantity:
                   type: number
                   example: 1
@@ -554,11 +623,33 @@ paths:
               required:
                 - destination
                 - dataLimitInGB
-                - startDate
-                - endDate
                 - quantity
+              oneOf:
+                - required: [startDate, endDate]
+                  properties:
+                    startDate:
+                      type: string
+                      format: date
+                      example: '2023-11-01'
+                      description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
+                    endDate:
+                      type: string
+                      format: date
+                      example: '2023-11-20'
+                      description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
+                - required: [duration]
+                  properties:
+                    duration:
+                      type: number
+                      example: 7
+                      description: |
+                        It designates the number of days the eSIM is valid for within the 90-day validity period from the issuance date.  
+                        
+                        For **limited packages**, the supported durations are: **1, 2, 7, 14, 30, 90 days**.  
+                        
+                        For **unlimited packages**, all durations are supported **except 90 days**.
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -581,14 +672,14 @@ paths:
                         createdDate:
                           type: string
                           format: date-time
-                          example: '2023-10-20T00:00:00+00:00'
+                          example: 2023-10-20T00:00:00+00:00
                           description: Creation date of the purchase in the format 'yyyy-MM-ddThh:mm:ssZZ'
                     profile:
                       type: object
                       properties:
                         iccid:
                           type: string
-                          example: '1111222233334444555000'
+                          example: "1111222233334444555000"
                           description: ID of the eSIM
                           minLength: 18
                           maxLength: 22
@@ -602,7 +693,7 @@ paths:
                           type: string
                           example: LPA:1$CELITECH.IDEMIA.IO$AAAAA-BBBBB-CCCCC-DDDDD
                           description: Manual Activation Code of the eSIM
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -613,7 +704,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -625,99 +716,93 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X POST \
+              https://api.celitech.net/v1/purchases/v2 \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "destination": "FRA",
+                "dataLimitInGB": 1,
+                "startDate": "2023-11-01",
+                "endDate": "2023-11-20",
+                "quantity": 1
+              }'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const createPurchaseV2Request = {
-                destination: 'FRA',
-                dataLimitInGb: 1,
-                startDate: '2023-11-01',
-                endDate: '2023-11-20',
-                quantity: 1,
-              };
+            using System.Threading.Tasks;
 
-              const { data } = await celitech.purchases.createPurchaseV2(createPurchaseV2Request);
+            using System.Text;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech, CreatePurchaseV2Request } from 'celitech-sdk';
-
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
-
-              const createPurchaseV2Request: CreatePurchaseV2Request = {
-                destination: 'FRA',
-                dataLimitInGb: 1,
-                startDate: '2023-11-01',
-                endDate: '2023-11-20',
-                quantity: 1,
-              };
-
-              const { data } = await celitech.purchases.createPurchaseV2(createPurchaseV2Request);
-
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-            use Celitech\Models\CreatePurchaseV2Request;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
+            using Newtonsoft.Json.Linq;
 
 
-            $input = new Models\CreatePurchaseV2Request(
-              destination: "FRA",
-              dataLimitInGb: 1,
-              startDate: "2023-11-01",
-              endDate: "2023-11-20",
-              quantity: 1
-            );
+            public class Program
 
-            $response = $sdk->purchases->createPurchaseV2(
-              input: $input
-            );
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                JObject json = JObject.Parse(@"{
+                    destination: 'FRA',
+                    dataLimitInGB: 1,
+                    startDate: '2023-11-01',
+                    endDate: '2023-11-20',
+                    quantity: 1
+                  }");
+                var postData = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                var request = await client.PostAsync("https://api.celitech.net/v1/purchases/v2", postData);
+                var response = await request.Content.ReadAsStringAsync();
 
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.CreatePurchaseV2OkResponse;
-            import io.github.celitech.celitechsdk.models.CreatePurchaseV2Request;
-            import java.util.List;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                CreatePurchaseV2Request createPurchaseV2Request = CreatePurchaseV2Request.builder()
-                  .destination("FRA")
-                  .dataLimitInGb(1D)
-                  .startDate("2023-11-01")
-                  .endDate("2023-11-20")
-                  .quantity(1D)
-                  .build();
-
-                List<CreatePurchaseV2OkResponse> response = celitech.purchases.createPurchaseV2(createPurchaseV2Request);
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var payload = String.join("\n"
+                  , "{"
+                  , " \"destination\": \"FRA\","
+                  , " \"dataLimitInGB\": 1,"
+                  , " \"startDate\": \"2023-11-01\","
+                  , " \"endDate\": \"2023-11-20\""
+                  , "}"
+                );
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/purchases/v2";
+                var request = HttpRequest.newBuilder()
+                  .POST(HttpRequest.BodyPublishers.ofString(payload))
+                  .uri(URI.create(host + pathname ))
+                  .header("Content-Type", "application/json")
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -749,27 +834,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-            from celitech.models import CreatePurchaseV2Request
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            request_body = CreatePurchaseV2Request(
-                destination="FRA",
-                data_limit_in_gb=1,
-                start_date="2023-11-01",
-                end_date="2023-11-20",
-                quantity=1
-            )
-
-            result = sdk.purchases.create_purchase_v2(request_body=request_body)
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -796,55 +860,84 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
-            using System.Text;
-            using Newtonsoft.Json.Linq;
+        - source: >-
+            import { Celitech, CreatePurchaseRequest } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                JObject json = JObject.Parse(@"{
-                    destination: 'FRA',
-                    dataLimitInGB: 1,
-                    startDate: '2023-11-01',
-                    endDate: '2023-11-20',
-                    quantity: 1
-                  }");
-                var postData = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                var request = await client.PostAsync("https://api.celitech.net/v1/purchases/v2", postData);
-                var response = await request.Content.ReadAsStringAsync();
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X POST \
-              https://api.celitech.net/v1/purchases/v2 \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>' \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "destination": "FRA",
-                "dataLimitInGB": 1,
-                "startDate": "2023-11-01",
-                "endDate": "2023-11-20",
-                "quantity": 1
-              }'
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
+
+              const createPurchaseRequest: CreatePurchaseRequest = {
+                destination: 'FRA',
+                dataLimitInGb: 1,
+                startDate: '2023-11-01',
+                endDate: '2023-11-20',
+                quantity: 1,
+              };
+
+              const { data } = await celitech.purchases.createPurchase(createPurchaseRequest);
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+            use Celitech\Models\CreatePurchaseRequest;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+
+            $input = new Models\CreatePurchaseRequest(
+              destination: "FRA",
+              dataLimitInGb: 1,
+              startDate: "2023-11-01",
+              endDate: "2023-11-20",
+              quantity: 1
+            );
+
+
+            $response = $sdk->purchases->createPurchase(
+              input: $input
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+            from celitech.models import CreatePurchaseRequest
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            request_body = CreatePurchaseRequest(
+                destination="FRA",
+                data_limit_in_gb=1,
+                start_date="2023-11-01",
+                end_date="2023-11-20",
+                quantity=1
+            )
+
+            result = sdk.purchases.create_purchase(request_body=request_body)
+
+            print(result)
+          lang: Python
+
   /purchases:
     post:
       deprecated: true
       summary: Create Purchase
-      description: This endpoint is used to purchase a new eSIM by providing the package details.
+      description: This endpoint is used to purchase a new eSIM by providing the
+        package details.
       operationId: createPurchase
       tags:
         - Purchases
@@ -858,52 +951,75 @@ paths:
                 destination:
                   type: string
                   example: FRA
-                  description: ISO representation of the package's destination
+                  description: ISO representation of the package's destination.
                 dataLimitInGB:
                   type: number
                   example: 1
-                  description: Size of the package in GB. The available options are 1, 2, 3, 5, 8, 20GB
+                  description:
+                    Size of the package in GB. The available options are 0.5, 1, 2, 3, 5, 8,
+                    20GB
                 startDate:
                   type: string
                   format: date
-                  example: '2023-11-01'
-                  description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
+                  example: 2023-11-01
+                  description:
+                    Start date of the package's validity in the format 'yyyy-MM-dd'.
+                    This date can be set to the current day or any day within
+                    the next 12 months.
                 endDate:
                   type: string
                   format: date
-                  example: '2023-11-20'
-                  description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
+                  example: 2023-11-20
+                  description:
+                    End date of the package's validity in the format 'yyyy-MM-dd'. End
+                    date can be maximum 90 days after Start date.
                 email:
                   type: string
                   example: example@domain.com
-                  description: Email address where the purchase confirmation email will be sent (including QR Code & activation steps)
+                  description:
+                    Email address where the purchase confirmation email will be sent
+                    (including QR Code & activation steps)
                 referenceId:
                   type: string
                   example: abc111222333444
-                  description: An identifier provided by the partner to link this purchase to their booking or transaction for analytics and debugging purposes.
+                  description:
+                    An identifier provided by the partner to link this purchase to
+                    their booking or transaction for analytics and debugging
+                    purposes.
                 networkBrand:
                   type: string
                   example: CELITECH
-                  description: Customize the network brand of the issued eSIM. The `networkBrand` parameter cannot exceed 15 characters in length and must contain only letters and numbers. This feature is available to platforms with Diamond tier only.
+                  description:
+                    Customize the network brand of the issued eSIM. The `networkBrand`
+                    parameter cannot exceed 15 characters in length and must contain only letters and numbers.
+                    This feature is available to platforms with Diamond tier only.
                 emailBrand:
                   type: string
                   example: CELITECH
-                  description: Customize the email subject brand. The `emailBrand` parameter cannot exceed 25 characters in length and must contain only letters, numbers, and spaces. This feature is available to platforms with Diamond tier only.
+                  description:
+                    Customize the email subject brand. The `emailBrand`
+                    parameter cannot exceed 25 characters in length and must contain only letters, numbers, and spaces.
+                    This feature is available to platforms with Diamond tier only.
                 startTime:
                   deprecated: true
                   type: number
-                  description: Epoch value representing the start time of the package's validity. This timestamp can be set to the current time or any time within the next 12 months.
+                  description:
+                    Epoch value representing the start time of the package's validity.
+                    This timestamp can be set to the current time or any time
+                    within the next 12 months.
                 endTime:
                   deprecated: true
                   type: number
-                  description: Epoch value representing the end time of the package's validity. End time can be maximum 90 days after Start time.
+                  description:
+                    Epoch value representing the end time of the package's validity.
+                    End time can be maximum 90 days after Start time.
               required:
                 - destination
                 - dataLimitInGB
                 - startDate
                 - endDate
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -922,25 +1038,33 @@ paths:
                         example: 6cf19d46-b545-4029-a46b-cdeba22b6957
                         description: ID of the package
                       startDate:
+                        nullable: true
                         type: string
                         format: date-time
-                        example: '2023-11-01T00:00:00+02:00'
-                        description: Start date of the package's validity in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                        example: 2023-11-01T00:00:00+02:00
+                        description:
+                          Start date of the package's validity in the format
+                          'yyyy-MM-ddThh:mm:ssZZ'
                       endDate:
+                        nullable: true
                         type: string
                         format: date-time
-                        example: '2023-11-20T23:59:59+02:00'
-                        description: End date of the package's validity in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                        example: 2023-11-20T23:59:59+02:00
+                        description:
+                          End date of the package's validity in the format
+                          'yyyy-MM-ddThh:mm:ssZZ'
                       createdDate:
                         type: string
                         format: date-time
-                        example: '2023-10-20T00:00:00+00:00'
+                        example: 2023-10-20T00:00:00+00:00
                         description: Creation date of the purchase in the format 'yyyy-MM-ddThh:mm:ssZZ'
                       startTime:
+                        nullable: true
                         deprecated: true
                         type: number
                         description: Epoch value representing the start time of the package's validity
                       endTime:
+                        nullable: true
                         deprecated: true
                         type: number
                         description: Epoch value representing the end time of the package's validity
@@ -949,7 +1073,7 @@ paths:
                     properties:
                       iccid:
                         type: string
-                        example: '1111222233334444555000'
+                        example: "1111222233334444555000"
                         description: ID of the eSIM
                         minLength: 18
                         maxLength: 22
@@ -963,7 +1087,7 @@ paths:
                         type: string
                         example: LPA:1$CELITECH.IDEMIA.IO$AAAAA-BBBBB-CCCCC-DDDDD
                         description: Manual Activation Code of the eSIM
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -974,7 +1098,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -986,94 +1110,91 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X POST \
+              https://api.celitech.net/v1/purchases \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "destination": "FRA",
+                "dataLimitInGB": 1,
+                "startDate": "2023-11-01",
+                "endDate": "2023-11-20"
+              }'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const createPurchaseRequest = {
-                destination: 'FRA',
-                dataLimitInGb: 1,
-                startDate: '2023-11-01',
-                endDate: '2023-11-20',
-              };
+            using System.Threading.Tasks;
 
-              const { data } = await celitech.purchases.createPurchase(createPurchaseRequest);
+            using System.Text;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech, CreatePurchaseRequest } from 'celitech-sdk';
-
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
-
-              const createPurchaseRequest: CreatePurchaseRequest = {
-                destination: 'FRA',
-                dataLimitInGb: 1,
-                startDate: '2023-11-01',
-                endDate: '2023-11-20',
-              };
-
-              const { data } = await celitech.purchases.createPurchase(createPurchaseRequest);
-
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-            use Celitech\Models\CreatePurchaseRequest;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
+            using Newtonsoft.Json.Linq;
 
 
-            $input = new Models\CreatePurchaseRequest(
-              destination: "FRA",
-              dataLimitInGb: 1,
-              startDate: "2023-11-01",
-              endDate: "2023-11-20"
-            );
+            public class Program
 
-            $response = $sdk->purchases->createPurchase(
-              input: $input
-            );
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                JObject json = JObject.Parse(@"{
+                    destination: 'FRA',
+                    dataLimitInGB: 1,
+                    startDate: '2023-11-01',
+                    endDate: '2023-11-20'
+                  }");
+                var postData = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                var request = await client.PostAsync("https://api.celitech.net/v1/purchases", postData);
+                var response = await request.Content.ReadAsStringAsync();
 
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.CreatePurchaseOkResponse;
-            import io.github.celitech.celitechsdk.models.CreatePurchaseRequest;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                CreatePurchaseRequest createPurchaseRequest = CreatePurchaseRequest.builder()
-                  .destination("FRA")
-                  .dataLimitInGb(1D)
-                  .startDate("2023-11-01")
-                  .endDate("2023-11-20")
-                  .build();
-
-                CreatePurchaseOkResponse response = celitech.purchases.createPurchase(createPurchaseRequest);
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var payload = String.join("\n"
+                  , "{"
+                  , " \"destination\": \"FRA\","
+                  , " \"dataLimitInGB\": 1,"
+                  , " \"startDate\": \"2023-11-01\","
+                  , " \"endDate\": \"2023-11-20\""
+                  , "}"
+                );
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/purchases";
+                var request = HttpRequest.newBuilder()
+                  .POST(HttpRequest.BodyPublishers.ofString(payload))
+                  .uri(URI.create(host + pathname ))
+                  .header("Content-Type", "application/json")
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -1104,26 +1225,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-            from celitech.models import CreatePurchaseRequest
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            request_body = CreatePurchaseRequest(
-                destination="FRA",
-                data_limit_in_gb=1,
-                start_date="2023-11-01",
-                end_date="2023-11-20"
-            )
-
-            result = sdk.purchases.create_purchase(request_body=request_body)
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -1149,51 +1250,79 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
-            using System.Text;
-            using Newtonsoft.Json.Linq;
+        - source: >-
+            import { Celitech, CreatePurchaseRequest } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                JObject json = JObject.Parse(@"{
-                    destination: 'FRA',
-                    dataLimitInGB: 1,
-                    startDate: '2023-11-01',
-                    endDate: '2023-11-20'
-                  }");
-                var postData = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                var request = await client.PostAsync("https://api.celitech.net/v1/purchases", postData);
-                var response = await request.Content.ReadAsStringAsync();
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X POST \
-              https://api.celitech.net/v1/purchases \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>' \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "destination": "FRA",
-                "dataLimitInGB": 1,
-                "startDate": "2023-11-01",
-                "endDate": "2023-11-20"
-              }'
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
+
+              const createPurchaseRequest: CreatePurchaseRequest = {
+                destination: 'FRA',
+                dataLimitInGb: 1,
+                startDate: '2023-11-01',
+                endDate: '2023-11-20',
+              };
+
+              const { data } = await celitech.purchases.createPurchase(createPurchaseRequest);
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+            use Celitech\Models\CreatePurchaseRequest;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+
+            $input = new Models\CreatePurchaseRequest(
+              destination: "FRA",
+              dataLimitInGb: 1,
+              startDate: "2023-11-01",
+              endDate: "2023-11-20"
+            );
+
+
+            $response = $sdk->purchases->createPurchase(
+              input: $input
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+            from celitech.models import CreatePurchaseRequest
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            request_body = CreatePurchaseRequest(
+                destination="FRA",
+                data_limit_in_gb=1,
+                start_date="2023-11-01",
+                end_date="2023-11-20"
+            )
+
+            result = sdk.purchases.create_purchase(request_body=request_body)
+
+            print(result)
+          lang: Python
     get:
       summary: List Purchases
-      description: This endpoint can be used to list all the successful purchases made between a given interval.
+      description:
+        This endpoint can be used to list all the successful purchases made
+        between a given interval.
       operationId: listPurchases
       tags:
         - Purchases
@@ -1203,55 +1332,72 @@ paths:
           description: ID of the eSIM
           schema:
             type: string
-            example: '1111222233334444555000'
+            example: "1111222233334444555000"
             minLength: 18
             maxLength: 22
         - in: query
           name: afterDate
-          description: Start date of the interval for filtering purchases in the format 'yyyy-MM-dd'
+          description:
+            Start date of the interval for filtering purchases in the format
+            'yyyy-MM-dd'
           schema:
             type: string
             format: date
-            example: '2023-11-01'
+            example: 2023-11-01
         - in: query
           name: beforeDate
-          description: End date of the interval for filtering purchases in the format 'yyyy-MM-dd'
+          description:
+            End date of the interval for filtering purchases in the format
+            'yyyy-MM-dd'
           schema:
             type: string
             format: date
-            example: '2023-11-20'
+            example: 2023-11-20
         - in: query
           name: referenceId
-          description: The referenceId that was provided by the partner during the purchase or topup flow.
+          description:
+            The referenceId that was provided by the partner during the
+            purchase or topup flow.
           schema:
             type: string
             example: abc111222333444
         - in: query
           name: afterCursor
-          description: To get the next batch of results, use this parameter. It tells the API where to start fetching data after the last item you received. It helps you avoid repeats and efficiently browse through large sets of data.
+          description:
+            To get the next batch of results, use this parameter. It tells the
+            API where to start fetching data after the last item you received.
+            It helps you avoid repeats and efficiently browse through large sets
+            of data.
           schema:
             type: string
             example: Y3JlYXRlZEF0OjE1OTk0OTMwOTgsZGVzdGluYXRpb246QVVTLG1pbkRheXM6MCxkYXRhTGltaXRJbkJ5dGVzOjUzNjg3MDkxMjA
         - in: query
           name: limit
-          description: Maximum number of purchases to be returned in the response. The value must be greater than 0 and less than or equal to 100. If not provided, the default value is 20
+          description:
+            Maximum number of purchases to be returned in the response. The
+            value must be greater than 0 and less than or equal to 100. If not
+            provided, the default value is 20
           schema:
             type: number
             example: 20
         - in: query
           name: after
           deprecated: true
-          description: Epoch value representing the start of the time interval for filtering purchases
+          description:
+            Epoch value representing the start of the time interval for
+            filtering purchases
           schema:
             type: number
         - in: query
           name: before
           deprecated: true
-          description: Epoch value representing the end of the time interval for filtering purchases
+          description:
+            Epoch value representing the end of the time interval for filtering
+            purchases
           schema:
             type: number
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -1268,25 +1414,39 @@ paths:
                           example: 4973fa15-6979-4daa-9cf3-672620df819c
                           description: ID of the purchase
                         startDate:
+                          nullable: true
                           type: string
                           format: date-time
-                          example: '2023-11-01T00:00:00+02:00'
-                          description: Start date of the package's validity in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                          example: 2023-11-01T00:00:00+02:00
+                          description:
+                            Start date of the package's validity in the format
+                            'yyyy-MM-ddThh:mm:ssZZ'
                         endDate:
+                          nullable: true
                           type: string
                           format: date-time
-                          example: '2023-11-20T23:59:59+02:00'
-                          description: End date of the package's validity in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                          example: 2023-11-20T23:59:59+02:00
+                          description:
+                            End date of the package's validity in the format
+                            'yyyy-MM-ddThh:mm:ssZZ'
+                        duration:
+                          nullable: true
+                          type: number
+                          example: 7
+                          description:
+                            It designates the number of days the eSIM is valid for within 90-day validity from issuance date.
                         createdDate:
                           type: string
                           format: date-time
-                          example: '2023-10-20T00:00:00+00:00'
+                          example: 2023-10-20T00:00:00+00:00
                           description: Creation date of the purchase in the format 'yyyy-MM-ddThh:mm:ssZZ'
                         startTime:
+                          nullable: true
                           deprecated: true
                           type: number
                           description: Epoch value representing the start time of the package's validity
                         endTime:
+                          nullable: true
                           deprecated: true
                           type: number
                           description: Epoch value representing the end time of the package's validity
@@ -1304,11 +1464,12 @@ paths:
                             dataLimitInBytes:
                               type: number
                               example: 1073741824
-                              description: Size of the package in Bytes
+                              description: |
+                                Size of the package in bytes. For **limited packages**, this field will return the data limit in bytes. For **unlimited packages**, it will return **-1** as an identifier.
                             destination:
                               type: string
                               example: FRA
-                              description: ISO representation of the package's destination
+                              description: ISO representation of the package's destination.
                             destinationName:
                               type: string
                               example: France
@@ -1322,28 +1483,44 @@ paths:
                           properties:
                             iccid:
                               type: string
-                              example: '1111222233334444555000'
+                              example: "1111222233334444555000"
                               description: ID of the eSIM
                               minLength: 18
                               maxLength: 22
                         source:
                           type: string
                           example: API
-                          description: The `source` indicates whether the purchase was made from the API, dashboard, landing-page, promo-page or iframe. For purchases made before September 8, 2023, the value will be displayed as 'Not available'.
+                          description:
+                            The `source` indicates whether the purchase was made
+                            from the API, dashboard, landing-page, promo-page or iframe.
+                            For purchases made before September 8, 2023, the
+                            value will be displayed as 'Not available'.
                         purchaseType:
                           type: string
                           example: First Purchase
-                          description: The `purchaseType` indicates whether this is the initial purchase that creates the eSIM (First Purchase) or a subsequent top-up on an existing eSIM (Top-up Purchase).
+                          description:
+                            The `purchaseType` indicates whether this is the initial purchase
+                            that creates the eSIM (First Purchase) or a subsequent top-up on
+                            an existing eSIM (Top-up Purchase).
                         referenceId:
                           type: string
                           example: abc111222333444
-                          description: The `referenceId` that was provided by the partner during the purchase or top-up flow. This identifier can be used for analytics and debugging purposes.
+                          description:
+                            The `referenceId` that was provided by the partner during the
+                            purchase or top-up flow. This identifier can be used
+                            for analytics and debugging purposes.
                   afterCursor:
                     type: string
                     example: Y3JlYXRlZEF0OjE1OTk0OTMwOTgsZGVzdGluYXRpb246QVVTLG1pbkRheXM6MCxkYXRhTGltaXRJbkJ5dGVzOjUzNjg3MDkxMjA
-                    description: The cursor value representing the end of the current page of results. Use this cursor value as the "afterCursor" parameter in your next request to retrieve the subsequent page of results. It ensures that you continue fetching data from where you left off, facilitating smooth pagination.
+                    description:
+                      The cursor value representing the end of the current page of
+                      results. Use this cursor value as the "afterCursor"
+                      parameter in your next request to retrieve the subsequent
+                      page of results. It ensures that you continue fetching
+                      data from where you left off, facilitating smooth
+                      pagination.
                     nullable: true
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1354,7 +1531,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -1366,62 +1543,63 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X GET \
+              https://api.celitech.net/v1/purchases \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const { data } = await celitech.purchases.listPurchases({});
+            using System.Threading.Tasks;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            public class Program
 
-              const { data } = await celitech.purchases.listPurchases({});
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                var request = await client.GetAsync("https://api.celitech.net/v1/purchases");
+                var response = await request.Content.ReadAsStringAsync();
 
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->purchases->listPurchases();
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.ListPurchasesOkResponse;
-            import io.github.celitech.celitechsdk.models.ListPurchasesParameters;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                ListPurchasesOkResponse response = celitech.purchases.listPurchases();
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/purchases";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname ))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -1444,18 +1622,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.purchases.list_purchases()
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -1473,32 +1639,45 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
+        - source: |-
+            import { Celitech } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                var request = await client.GetAsync("https://api.celitech.net/v1/purchases");
-                var response = await request.Content.ReadAsStringAsync();
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              https://api.celitech.net/v1/purchases \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+              const { data } = await celitech.purchases.listPurchases({});
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->purchases->listPurchases();
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.purchases.list_purchases()
+
+            print(result)
+          lang: Python
   /purchases/topup:
     post:
       summary: Top-up eSIM
@@ -1522,21 +1701,16 @@ paths:
                 dataLimitInGB:
                   type: number
                   example: 1
-                  description: Size of the package in GB. The available options are 1, 2, 3, 5, 8, 20GB
-                startDate:
-                  type: string
-                  format: date
-                  example: '2023-11-01'
-                  description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
-                endDate:
-                  type: string
-                  format: date
-                  example: '2023-11-20'
-                  description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
+                  description: |
+                    Size of the package in GB.
+                    
+                    For **limited packages**, the available options are: **0.5, 1, 2, 3, 5, 8, 20GB** (supports `duration` or `startDate` / `endDate`).
+                    
+                    For **unlimited packages** (available to Region-3), please use **-1** as an identifier (supports `duration` only).
                 email:
                   type: string
                   example: example@domain.com
-                  description: Email address where the purchase confirmation email will be sent (excluding QR Code & activation steps)
+                  description: Email address where the purchase confirmation email will be sent (excluding QR Code & activation steps).
                 referenceId:
                   type: string
                   example: abc111222333444
@@ -1556,10 +1730,32 @@ paths:
               required:
                 - iccid
                 - dataLimitInGB
-                - startDate
-                - endDate
+              oneOf:
+                - required: [startDate, endDate]
+                  properties:
+                    startDate:
+                      type: string
+                      format: date
+                      example: '2023-11-01'
+                      description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
+                    endDate:
+                      type: string
+                      format: date
+                      example: '2023-11-20'
+                      description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
+                - required: [duration]
+                  properties:
+                    duration:
+                      type: number
+                      example: 7
+                      description: |
+                        It designates the number of days the eSIM is valid for within the 90-day validity period from the issuance date.  
+                        
+                        For **limited packages**, the supported durations are: **1, 2, 7, 14, 30, 90 days**.  
+                        
+                        For **unlimited packages**, all durations are supported **except 90 days**.
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -1578,25 +1774,39 @@ paths:
                         example: 6cf19d46-b545-4029-a46b-cdeba22b6957
                         description: ID of the package
                       startDate:
+                        nullable: true
                         type: string
                         format: date-time
-                        example: '2023-11-01T00:00:00+02:00'
-                        description: Start date of the package's validity in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                        example: 2023-11-01T00:00:00+02:00
+                        description:
+                          Start date of the package's validity in the format
+                          'yyyy-MM-ddThh:mm:ssZZ'
                       endDate:
+                        nullable: true
                         type: string
                         format: date-time
-                        example: '2023-11-20T23:59:59+02:00'
-                        description: End date of the package's validity in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                        example: 2023-11-20T23:59:59+02:00
+                        description:
+                          End date of the package's validity in the format
+                          'yyyy-MM-ddThh:mm:ssZZ'
+                      duration:
+                        nullable: true
+                        type: number
+                        example: 7
+                        description:
+                          It designates the number of days the eSIM is valid for within 90-day validity from issuance date.
                       createdDate:
                         type: string
                         format: date-time
-                        example: '2023-10-20T00:00:00+00:00'
+                        example: 2023-10-20T00:00:00+00:00
                         description: Creation date of the purchase in the format 'yyyy-MM-ddThh:mm:ssZZ'
                       startTime:
+                        nullable: true
                         deprecated: true
                         type: number
                         description: Epoch value representing the start time of the package's validity
                       endTime:
+                        nullable: true
                         deprecated: true
                         type: number
                         description: Epoch value representing the end time of the package's validity
@@ -1605,11 +1815,11 @@ paths:
                     properties:
                       iccid:
                         type: string
-                        example: '1111222233334444555000'
+                        example: "1111222233334444555000"
                         description: ID of the eSIM
                         minLength: 18
                         maxLength: 22
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1620,7 +1830,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -1632,94 +1842,91 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X POST \
+              https://api.celitech.net/v1/purchases/topup \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "iccid": "1111222233334444555000",
+                "dataLimitInGB": 1,
+                "startDate": "2023-11-01",
+                "endDate": "2023-11-20"
+              }'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const topUpEsimRequest = {
-                iccid: '1111222233334444555000',
-                dataLimitInGb: 1,
-                startDate: '2023-11-01',
-                endDate: '2023-11-20',
-              };
+            using System.Threading.Tasks;
 
-              const { data } = await celitech.purchases.topUpEsim(topUpEsimRequest);
+            using System.Text;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech, TopUpEsimRequest } from 'celitech-sdk';
-
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
-
-              const topUpEsimRequest: TopUpEsimRequest = {
-                iccid: '1111222233334444555000',
-                dataLimitInGb: 1,
-                startDate: '2023-11-01',
-                endDate: '2023-11-20',
-              };
-
-              const { data } = await celitech.purchases.topUpEsim(topUpEsimRequest);
-
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-            use Celitech\Models\TopUpEsimRequest;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
+            using Newtonsoft.Json.Linq;
 
 
-            $input = new Models\TopUpEsimRequest(
-              iccid: "1111222233334444555000",
-              dataLimitInGb: 1,
-              startDate: "2023-11-01",
-              endDate: "2023-11-20"
-            );
+            public class Program
 
-            $response = $sdk->purchases->topUpEsim(
-              input: $input
-            );
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                JObject json = JObject.Parse(@"{
+                    iccid: '1111222233334444555000',
+                    dataLimitInGB: 1,
+                    startDate: '2023-11-01',
+                    endDate: '2023-11-20'
+                  }");
+                var postData = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                var request = await client.PostAsync("https://api.celitech.net/v1/purchases/topup", postData);
+                var response = await request.Content.ReadAsStringAsync();
 
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.TopUpEsimOkResponse;
-            import io.github.celitech.celitechsdk.models.TopUpEsimRequest;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                TopUpEsimRequest topUpEsimRequest = TopUpEsimRequest.builder()
-                  .iccid("1111222233334444555000")
-                  .dataLimitInGb(1D)
-                  .startDate("2023-11-01")
-                  .endDate("2023-11-20")
-                  .build();
-
-                TopUpEsimOkResponse response = celitech.purchases.topUpEsim(topUpEsimRequest);
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var payload = String.join("\n"
+                  , "{"
+                  , " \"iccid\": \"1111222233334444555000\","
+                  , " \"dataLimitInGB\": 1,"
+                  , " \"startDate\": \"2023-11-01\","
+                  , " \"endDate\": \"2023-11-20\""
+                  , "}"
+                );
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/purchases/topup";
+                var request = HttpRequest.newBuilder()
+                  .POST(HttpRequest.BodyPublishers.ofString(payload))
+                  .uri(URI.create(host + pathname ))
+                  .header("Content-Type", "application/json")
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -1750,26 +1957,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-            from celitech.models import TopUpEsimRequest
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            request_body = TopUpEsimRequest(
-                iccid="1111222233334444555000",
-                data_limit_in_gb=1,
-                start_date="2023-11-01",
-                end_date="2023-11-20"
-            )
-
-            result = sdk.purchases.top_up_esim(request_body=request_body)
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -1795,52 +1982,83 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
-            using System.Text;
-            using Newtonsoft.Json.Linq;
+        - source: >-
+            import { Celitech, TopUpEsimRequest } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                JObject json = JObject.Parse(@"{
-                    iccid: '1111222233334444555000',
-                    dataLimitInGB: 1,
-                    startDate: '2023-11-01',
-                    endDate: '2023-11-20'
-                  }");
-                var postData = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                var request = await client.PostAsync("https://api.celitech.net/v1/purchases/topup", postData);
-                var response = await request.Content.ReadAsStringAsync();
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X POST \
-              https://api.celitech.net/v1/purchases/topup \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>' \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "iccid": "1111222233334444555000",
-                "dataLimitInGB": 1,
-                "startDate": "2023-11-01",
-                "endDate": "2023-11-20"
-              }'
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
+
+              const topUpEsimRequest: TopUpEsimRequest = {
+                iccid: '1111222233334444555000',
+                dataLimitInGb: 1,
+                startDate: '2023-11-01',
+                endDate: '2023-11-20',
+              };
+
+              const { data } = await celitech.purchases.topUpEsim(topUpEsimRequest);
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+            use Celitech\Models\TopUpEsimRequest;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+
+            $input = new Models\TopUpEsimRequest(
+              iccid: "1111222233334444555000",
+              dataLimitInGb: 1,
+              startDate: "2023-11-01",
+              endDate: "2023-11-20"
+            );
+
+
+            $response = $sdk->purchases->topUpEsim(
+              input: $input
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+            from celitech.models import TopUpEsimRequest
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            request_body = TopUpEsimRequest(
+                iccid="1111222233334444555000",
+                data_limit_in_gb=1,
+                start_date="2023-11-01",
+                end_date="2023-11-20"
+            )
+
+            result = sdk.purchases.top_up_esim(request_body=request_body)
+
+            print(result)
+          lang: Python
   /purchases/edit:
     post:
       summary: Edit Purchase
-      description: This endpoint allows you to modify the dates of an existing package with a future activation start time. Editing can only be performed for packages that have not been activated, and it cannot change the package size. The modification must not change the package duration category to ensure pricing consistency.
+      description:
+        This endpoint allows you to modify the dates of an existing package
+        with a future activation start time. Editing can only be performed for
+        packages that have not been activated, and it cannot change the package
+        size. The modification must not change the package duration category to
+        ensure pricing consistency. Duration based packages cannot be edited.
       operationId: editPurchase
       tags:
         - Purchases
@@ -1862,23 +2080,33 @@ paths:
                 startDate:
                   type: string
                   format: date
-                  example: '2023-11-01'
-                  description: Start date of the package's validity in the format 'yyyy-MM-dd'. This date can be set to the current day or any day within the next 12 months.
+                  example: 2023-11-01
+                  description:
+                    Start date of the package's validity in the format 'yyyy-MM-dd'.
+                    This date can be set to the current day or any day within
+                    the next 12 months.
                 endDate:
                   type: string
                   format: date
-                  example: '2023-11-20'
-                  description: End date of the package's validity in the format 'yyyy-MM-dd'. End date can be maximum 90 days after Start date.
+                  example: 2023-11-20
+                  description:
+                    End date of the package's validity in the format 'yyyy-MM-dd'. End
+                    date can be maximum 90 days after Start date.
                 startTime:
                   deprecated: true
                   type: number
-                  description: Epoch value representing the start time of the package's validity. This timestamp can be set to the current time or any time within the next 12 months.
+                  description:
+                    Epoch value representing the start time of the package's validity.
+                    This timestamp can be set to the current time or any time
+                    within the next 12 months.
                 endTime:
                   deprecated: true
                   type: number
-                  description: Epoch value representing the end time of the package's validity. End time can be maximum 90 days after Start time.
+                  description:
+                    Epoch value representing the end time of the package's validity.
+                    End time can be maximum 90 days after Start time.
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -1890,24 +2118,34 @@ paths:
                     example: ae471106-c8b4-42cf-b83a-b061291f2922
                     description: ID of the purchase
                   newStartDate:
+                    nullable: true
                     type: string
                     format: date-time
-                    example: '2023-11-01T00:00:00+02:00'
-                    description: Start date of the package's validity in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                    example: 2023-11-01T00:00:00+02:00
+                    description:
+                      Start date of the package's validity in the format
+                      'yyyy-MM-ddThh:mm:ssZZ'
                   newEndDate:
+                    nullable: true
                     type: string
                     format: date-time
-                    example: '2023-11-20T23:59:59+02:00'
-                    description: End date of the package's validity in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                    example: 2023-11-20T23:59:59+02:00
+                    description:
+                      End date of the package's validity in the format
+                      'yyyy-MM-ddThh:mm:ssZZ'
                   newStartTime:
+                    nullable: true
                     deprecated: true
                     type: number
-                    description: Epoch value representing the new start time of the package's validity
+                    description:
+                      Epoch value representing the new start time of the package's
+                      validity
                   newEndTime:
+                    nullable: true
                     deprecated: true
                     type: number
                     description: Epoch value representing the new end time of the package's validity
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1918,7 +2156,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -1930,90 +2168,88 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X POST \
+              https://api.celitech.net/v1/purchases/edit \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>' \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "purchaseId": "ae471106-c8b4-42cf-b83a-b061291f2922",
+                "startDate": "2023-11-01",
+                "endDate": "2023-11-20"
+              }'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const editPurchaseRequest = {
-                purchaseId: 'ae471106-c8b4-42cf-b83a-b061291f2922',
-                startDate: '2023-11-01',
-                endDate: '2023-11-20',
-              };
+            using System.Threading.Tasks;
 
-              const { data } = await celitech.purchases.editPurchase(editPurchaseRequest);
+            using System.Text;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech, EditPurchaseRequest } from 'celitech-sdk';
-
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
-
-              const editPurchaseRequest: EditPurchaseRequest = {
-                purchaseId: 'ae471106-c8b4-42cf-b83a-b061291f2922',
-                startDate: '2023-11-01',
-                endDate: '2023-11-20',
-              };
-
-              const { data } = await celitech.purchases.editPurchase(editPurchaseRequest);
-
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-            use Celitech\Models\EditPurchaseRequest;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
+            using Newtonsoft.Json.Linq;
 
 
-            $input = new Models\EditPurchaseRequest(
-              purchaseId: "ae471106-c8b4-42cf-b83a-b061291f2922",
-              startDate: "2023-11-01",
-              endDate: "2023-11-20"
-            );
+            public class Program
 
-            $response = $sdk->purchases->editPurchase(
-              input: $input
-            );
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                JObject json = JObject.Parse(@"{
+                    purchaseId: 'ae471106-c8b4-42cf-b83a-b061291f2922',
+                    startDate: '2023-11-01',
+                    endDate: '2023-11-20'
+                  }");
+                var postData = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                var request = await client.PostAsync("https://api.celitech.net/v1/purchases/edit", postData);
+                var response = await request.Content.ReadAsStringAsync();
 
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.EditPurchaseOkResponse;
-            import io.github.celitech.celitechsdk.models.EditPurchaseRequest;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                EditPurchaseRequest editPurchaseRequest = EditPurchaseRequest.builder()
-                  .purchaseId("ae471106-c8b4-42cf-b83a-b061291f2922")
-                  .startDate("2023-11-01")
-                  .endDate("2023-11-20")
-                  .build();
-
-                EditPurchaseOkResponse response = celitech.purchases.editPurchase(editPurchaseRequest);
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var payload = String.join("\n"
+                  , "{"
+                  , " \"purchaseId\": \"ae471106-c8b4-42cf-b83a-b061291f2922\","
+                  , " \"startDate\": \"2023-11-01\","
+                  , " \"endDate\": \"2023-11-20\""
+                  , "}"
+                );
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/purchases/edit";
+                var request = HttpRequest.newBuilder()
+                  .POST(HttpRequest.BodyPublishers.ofString(payload))
+                  .uri(URI.create(host + pathname ))
+                  .header("Content-Type", "application/json")
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -2043,25 +2279,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-            from celitech.models import EditPurchaseRequest
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            request_body = EditPurchaseRequest(
-                purchase_id="ae471106-c8b4-42cf-b83a-b061291f2922",
-                start_date="2023-11-01",
-                end_date="2023-11-20"
-            )
-
-            result = sdk.purchases.edit_purchase(request_body=request_body)
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -2086,50 +2303,78 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
-            using System.Text;
-            using Newtonsoft.Json.Linq;
+        - source: >-
+            import { Celitech, EditPurchaseRequest } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                JObject json = JObject.Parse(@"{
-                    purchaseId: 'ae471106-c8b4-42cf-b83a-b061291f2922',
-                    startDate: '2023-11-01',
-                    endDate: '2023-11-20'
-                  }");
-                var postData = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                var request = await client.PostAsync("https://api.celitech.net/v1/purchases/edit", postData);
-                var response = await request.Content.ReadAsStringAsync();
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X POST \
-              https://api.celitech.net/v1/purchases/edit \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>' \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "purchaseId": "ae471106-c8b4-42cf-b83a-b061291f2922",
-                "startDate": "2023-11-01",
-                "endDate": "2023-11-20"
-              }'
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
+
+              const editPurchaseRequest: EditPurchaseRequest = {
+                purchaseId: 'ae471106-c8b4-42cf-b83a-b061291f2922',
+                startDate: '2023-11-01',
+                endDate: '2023-11-20',
+              };
+
+              const { data } = await celitech.purchases.editPurchase(editPurchaseRequest);
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+            use Celitech\Models\EditPurchaseRequest;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+
+            $input = new Models\EditPurchaseRequest(
+              purchaseId: "ae471106-c8b4-42cf-b83a-b061291f2922",
+              startDate: "2023-11-01",
+              endDate: "2023-11-20"
+            );
+
+
+            $response = $sdk->purchases->editPurchase(
+              input: $input
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+            from celitech.models import EditPurchaseRequest
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            request_body = EditPurchaseRequest(
+                purchase_id="ae471106-c8b4-42cf-b83a-b061291f2922",
+                start_date="2023-11-01",
+                end_date="2023-11-20"
+            )
+
+            result = sdk.purchases.edit_purchase(request_body=request_body)
+
+            print(result)
+          lang: Python
   /purchases/{purchaseId}/consumption:
     get:
       summary: Get Purchase Consumption
-      description: This endpoint can be called for consumption notifications (e.g. every 1 hour or when the user clicks a button). It returns the data balance (consumption) of purchased packages.
+      description:
+        This endpoint can be called for consumption notifications (e.g.
+        every 1 hour or when the user clicks a button). It returns the data
+        balance (consumption) of purchased packages.
       operationId: getPurchaseConsumption
       tags:
         - Purchases
@@ -2142,7 +2387,7 @@ paths:
             type: string
             example: 4973fa15-6979-4daa-9cf3-672620df819c
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -2152,12 +2397,17 @@ paths:
                   dataUsageRemainingInBytes:
                     type: number
                     example: 1073741824
-                    description: Remaining balance of the package in bytes
+                    description: |
+                      Remaining balance of the package in byte. 
+                      For **limited packages**, this field indicates the remaining data in bytes. 
+                      For **unlimited packages**, it will return **-1** as an identifier.
                   status:
                     type: string
                     example: ACTIVE
-                    description: Status of the connectivity, possible values are 'ACTIVE' or 'NOT_ACTIVE'
-        '400':
+                    description:
+                      Status of the connectivity, possible values are 'ACTIVE' or
+                      'NOT_ACTIVE'
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -2168,7 +2418,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -2180,126 +2430,24 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
-
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
-
-              const { data } = await celitech.purchases.getPurchaseConsumption('4973fa15-6979-4daa-9cf3-672620df819c');
-
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
-
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
-
-              const { data } = await celitech.purchases.getPurchaseConsumption('4973fa15-6979-4daa-9cf3-672620df819c');
-
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->purchases->getPurchaseConsumption(
-              purchaseId: "4973fa15-6979-4daa-9cf3-672620df819c"
-            );
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.GetPurchaseConsumptionOkResponse;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                GetPurchaseConsumptionOkResponse response = celitech.purchases.getPurchaseConsumption(
-                  "4973fa15-6979-4daa-9cf3-672620df819c"
-                );
-
-                System.out.println(response);
-              }
-            }
-          lang: Java
-        - lang: Go
-          label: Go
+        - lang: cURL
+          label: cURL
           source: |
-            package main
-
-            import (
-              "fmt"
-              "net/http"
-              "io/ioutil"
-            )
-
-            func main() {
-              purchaseId := "YOUR_purchaseId_PARAMETER";
-              reqUrl := "https://api.celitech.net/v1/purchases/" + purchaseId + "/consumption"
-              req, _ := http.NewRequest("GET", reqUrl, nil)
-              req.Header.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>")
-              res, _ := http.DefaultClient.Do(req)
-              defer res.Body.Close()
-              body, _ := ioutil.ReadAll(res.Body)
-
-              fmt.Println(res)
-              fmt.Println(string(body))
-            }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.purchases.get_purchase_consumption(purchase_id="4973fa15-6979-4daa-9cf3-672620df819c")
-
-            print(result)
-          lang: Python
-        - lang: Ruby
-          label: Ruby
-          source: |
-            require 'uri'
-            require 'net/http'
-            require 'openssl'
-
-            purchase_id = 'YOUR_purchaseId_PARAMETER'
-            url = URI('https://api.celitech.net/v1/purchases/' + purchase_id + '/consumption')
-
-            http = Net::HTTP.new(url.host, url.port)
-            http.use_ssl = true
-
-            request = Net::HTTP::Get.new(url)
-            request['Authorization'] = 'Bearer <YOUR_TOKEN_HERE>'
-
-            response = http.request(request)
-            puts response.read_body
+            curl -i -X GET \
+              'https://api.celitech.net/v1/purchases/{purchaseId}/consumption' \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
         - lang: C#
           label: C#
-          source: |
+          source: >
             using System;
+
             using System.Net.Http;
+
             using System.Threading.Tasks;
 
+
             public class Program
+
             {
               private readonly IHttpClientFactory _httpClientFactory;
               public static async Task Main(string[] args)
@@ -2313,12 +2461,130 @@ paths:
                 Console.WriteLine(response);
               }
             }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              'https://api.celitech.net/v1/purchases/{purchaseId}/consumption' \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var host = "https://api.celitech.net";
+                var purchaseId = "YOUR_purchaseId_PARAMETER";
+                var pathname = "/v1/purchases/" + purchaseId + "/consumption";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname ))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
+        - lang: Go
+          label: Go
+          source: >
+            package main
+
+
+            import (
+              "fmt"
+              "net/http"
+              "io/ioutil"
+            )
+
+
+            func main() {
+              purchaseId := "YOUR_purchaseId_PARAMETER";
+              reqUrl := "https://api.celitech.net/v1/purchases/" + purchaseId + "/consumption"
+              req, _ := http.NewRequest("GET", reqUrl, nil)
+              req.Header.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+              res, _ := http.DefaultClient.Do(req)
+              defer res.Body.Close()
+              body, _ := ioutil.ReadAll(res.Body)
+
+              fmt.Println(res)
+              fmt.Println(string(body))
+            }
+        - lang: Ruby
+          label: Ruby
+          source: >
+            require 'uri'
+
+            require 'net/http'
+
+            require 'openssl'
+
+
+            purchase_id = 'YOUR_purchaseId_PARAMETER'
+
+            url = URI('https://api.celitech.net/v1/purchases/' + purchase_id +
+            '/consumption')
+
+
+            http = Net::HTTP.new(url.host, url.port)
+
+            http.use_ssl = true
+
+
+            request = Net::HTTP::Get.new(url)
+
+            request['Authorization'] = 'Bearer <YOUR_TOKEN_HERE>'
+
+
+            response = http.request(request)
+
+            puts response.read_body
+        - source: >-
+            import { Celitech } from 'celitech-sdk';
+
+
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
+
+              const { data } = await celitech.purchases.getPurchaseConsumption('4973fa15-6979-4daa-9cf3-672620df819c');
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->purchases->getPurchaseConsumption(
+              purchaseId: "4973fa15-6979-4daa-9cf3-672620df819c"
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.purchases.get_purchase_consumption(purchase_id="4973fa15-6979-4daa-9cf3-672620df819c")
+
+            print(result)
+          lang: Python
   /esim:
     get:
       summary: Get eSIM Status
@@ -2333,11 +2599,11 @@ paths:
           description: ID of the eSIM
           schema:
             type: string
-            example: '1111222233334444555000'
+            example: "1111222233334444555000"
             minLength: 18
             maxLength: 22
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -2349,7 +2615,7 @@ paths:
                     properties:
                       iccid:
                         type: string
-                        example: '1111222233334444555000'
+                        example: "1111222233334444555000"
                         description: ID of the eSIM
                         minLength: 18
                         maxLength: 22
@@ -2364,8 +2630,10 @@ paths:
                       status:
                         type: string
                         example: RELEASED
-                        description: Status of the eSIM, possible values are 'RELEASED', 'DOWNLOADED', 'INSTALLED', 'ENABLED', 'DELETED', or 'ERROR'
-        '400':
+                        description:
+                          Status of the eSIM, possible values are 'RELEASED', 'DOWNLOADED',
+                          'INSTALLED', 'ENABLED', 'DELETED', or 'ERROR'
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -2376,7 +2644,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -2388,70 +2656,74 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X GET \
+              'https://api.celitech.net/v1/esim?iccid=1111222233334444555000' \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const { data } = await celitech.eSim.getEsim({
-                iccid: '1111222233334444555000',
-              });
+            using System.Threading.Tasks;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            public class Program
 
-              const { data } = await celitech.eSim.getEsim({
-                iccid: '1111222233334444555000',
-              });
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                var request = await client.GetAsync("https://api.celitech.net/v1/esim?iccid=1111222233334444555000");
+                var response = await request.Content.ReadAsStringAsync();
 
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->eSim->getEsim(
-              iccid: "1111222233334444555000"
-            );
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.GetEsimOkResponse;
-            import io.github.celitech.celitechsdk.models.GetEsimParameters;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                GetEsimParameters requestParameters = GetEsimParameters.builder().iccid("1111222233334444555000").build();
-
-                GetEsimOkResponse response = celitech.eSim.getEsim(requestParameters);
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+            import java.nio.charset.StandardCharsets;
+
+            import java.util.stream.Collectors;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                HashMap<String, String> params = new HashMap<>();
+                params.put("iccid", "1111222233334444555000");
+
+                var query = params.keySet().stream()
+                  .map(key -> key + "=" + URLEncoder.encode(params.get(key), StandardCharsets.UTF_8))
+                  .collect(Collectors.joining("&"));
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/esim";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname + '?' + query))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -2479,18 +2751,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.e_sim.get_esim(iccid="1111222233334444555000")
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -2512,32 +2772,49 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
+        - source: |-
+            import { Celitech } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                var request = await client.GetAsync("https://api.celitech.net/v1/esim?iccid=1111222233334444555000");
-                var response = await request.Content.ReadAsStringAsync();
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              'https://api.celitech.net/v1/esim?iccid=1111222233334444555000' \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+              const { data } = await celitech.eSim.getEsim({
+                iccid: '1111222233334444555000',
+              });
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->eSim->getEsim(
+              iccid: "1111222233334444555000"
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.e_sim.get_esim(iccid="1111222233334444555000")
+
+            print(result)
+          lang: Python
   /esim/{iccid}/device:
     get:
       summary: Get eSIM Device
@@ -2552,11 +2829,11 @@ paths:
           description: ID of the eSIM
           schema:
             type: string
-            example: '1111222233334444555000'
+            example: "1111222233334444555000"
             minLength: 18
             maxLength: 22
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -2580,9 +2857,9 @@ paths:
                         description: Model of the Device
                       eid:
                         type: string
-                        example: '12345678901234567890123456789012'
+                        example: "12345678901234567890123456789012"
                         description: Serial Number of the eSIM
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -2593,7 +2870,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -2605,63 +2882,65 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X GET \
+              'https://api.celitech.net/v1/esim/{iccid}/device' \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const { data } = await celitech.eSim.getEsimDevice('1111222233334444555000');
+            using System.Threading.Tasks;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            public class Program
 
-              const { data } = await celitech.eSim.getEsimDevice('1111222233334444555000');
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                  var Iccid = "YOUR_iccid_PARAMETER";
+                var request = await client.GetAsync("https://api.celitech.net/v1/esim/" + Iccid + "/device");
+                var response = await request.Content.ReadAsStringAsync();
 
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->eSim->getEsimDevice(
-              iccid: "1111222233334444555000"
-            );
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.GetEsimDeviceOkResponse;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                GetEsimDeviceOkResponse response = celitech.eSim.getEsimDevice("1111222233334444555000");
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var host = "https://api.celitech.net";
+                var iccid = "YOUR_iccid_PARAMETER";
+                var pathname = "/v1/esim/" + iccid + "/device";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname ))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -2685,18 +2964,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.e_sim.get_esim_device(iccid="1111222233334444555000")
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -2715,33 +2982,48 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
+        - source: >-
+            import { Celitech } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                  var Iccid = "YOUR_iccid_PARAMETER";
-                var request = await client.GetAsync("https://api.celitech.net/v1/esim/" + Iccid + "/device");
-                var response = await request.Content.ReadAsStringAsync();
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              'https://api.celitech.net/v1/esim/{iccid}/device' \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
+
+              const { data } = await celitech.eSim.getEsimDevice('1111222233334444555000');
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->eSim->getEsimDevice(
+              iccid: "1111222233334444555000"
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.e_sim.get_esim_device(iccid="1111222233334444555000")
+
+            print(result)
+          lang: Python
   /esim/{iccid}/history:
     get:
       summary: Get eSIM History
@@ -2756,11 +3038,11 @@ paths:
           description: ID of the eSIM
           schema:
             type: string
-            example: '1111222233334444555000'
+            example: "1111222233334444555000"
             minLength: 18
             maxLength: 22
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -2772,7 +3054,7 @@ paths:
                     properties:
                       iccid:
                         type: string
-                        example: '1111222233334444555000'
+                        example: "1111222233334444555000"
                         description: ID of the eSIM
                         minLength: 18
                         maxLength: 22
@@ -2784,17 +3066,22 @@ paths:
                             status:
                               type: string
                               example: INSTALLED
-                              description: The status of the eSIM at a given time, possible values are 'RELEASED', 'DOWNLOADED', 'INSTALLED', 'ENABLED', 'DELETED', or 'ERROR'
+                              description:
+                                The status of the eSIM at a given time, possible values are
+                                'RELEASED', 'DOWNLOADED', 'INSTALLED',
+                                'ENABLED', 'DELETED', or 'ERROR'
                             statusDate:
                               type: string
                               format: date-time
-                              example: '2023-10-20T00:00:00+00:00'
-                              description: The date when the eSIM status changed in the format 'yyyy-MM-ddThh:mm:ssZZ'
+                              example: 2023-10-20T00:00:00+00:00
+                              description:
+                                The date when the eSIM status changed in the format
+                                'yyyy-MM-ddThh:mm:ssZZ'
                             date:
                               deprecated: true
                               type: number
                               description: Epoch value representing the date when the eSIM status changed
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -2805,7 +3092,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -2817,63 +3104,65 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X GET \
+              'https://api.celitech.net/v1/esim/{iccid}/history' \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const { data } = await celitech.eSim.getEsimHistory('1111222233334444555000');
+            using System.Threading.Tasks;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            public class Program
 
-              const { data } = await celitech.eSim.getEsimHistory('1111222233334444555000');
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                  var Iccid = "YOUR_iccid_PARAMETER";
+                var request = await client.GetAsync("https://api.celitech.net/v1/esim/" + Iccid + "/history");
+                var response = await request.Content.ReadAsStringAsync();
 
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->eSim->getEsimHistory(
-              iccid: "1111222233334444555000"
-            );
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.GetEsimHistoryOkResponse;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                GetEsimHistoryOkResponse response = celitech.eSim.getEsimHistory("1111222233334444555000");
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var host = "https://api.celitech.net";
+                var iccid = "YOUR_iccid_PARAMETER";
+                var pathname = "/v1/esim/" + iccid + "/history";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname ))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -2897,18 +3186,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.e_sim.get_esim_history(iccid="1111222233334444555000")
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -2927,33 +3204,48 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
+        - source: >-
+            import { Celitech } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                  var Iccid = "YOUR_iccid_PARAMETER";
-                var request = await client.GetAsync("https://api.celitech.net/v1/esim/" + Iccid + "/history");
-                var response = await request.Content.ReadAsStringAsync();
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              'https://api.celitech.net/v1/esim/{iccid}/history' \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
+
+              const { data } = await celitech.eSim.getEsimHistory('1111222233334444555000');
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->eSim->getEsimHistory(
+              iccid: "1111222233334444555000"
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.e_sim.get_esim_history(iccid="1111222233334444555000")
+
+            print(result)
+          lang: Python
   /esim/{iccid}/mac:
     get:
       summary: Get eSIM MAC
@@ -2968,11 +3260,11 @@ paths:
           description: ID of the eSIM
           schema:
             type: string
-            example: '1111222233334444555000'
+            example: "1111222233334444555000"
             minLength: 18
             maxLength: 22
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -2984,7 +3276,7 @@ paths:
                     properties:
                       iccid:
                         type: string
-                        example: '1111222233334444555000'
+                        example: "1111222233334444555000"
                         description: ID of the eSIM
                         minLength: 18
                         maxLength: 22
@@ -2996,7 +3288,7 @@ paths:
                         type: string
                         example: LPA:1$CELITECH.IDEMIA.IO$AAAAA-BBBBB-CCCCC-DDDDD
                         description: The manual activation code
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -3007,7 +3299,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -3019,63 +3311,65 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X GET \
+              'https://api.celitech.net/v1/esim/{iccid}/mac' \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const { data } = await celitech.eSim.getEsimMac('1111222233334444555000');
+            using System.Threading.Tasks;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            public class Program
 
-              const { data } = await celitech.eSim.getEsimMac('1111222233334444555000');
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                  var Iccid = "YOUR_iccid_PARAMETER";
+                var request = await client.GetAsync("https://api.celitech.net/v1/esim/" + Iccid + "/mac");
+                var response = await request.Content.ReadAsStringAsync();
 
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->eSim->getEsimMac(
-              iccid: "1111222233334444555000"
-            );
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.GetEsimMacOkResponse;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                GetEsimMacOkResponse response = celitech.eSim.getEsimMac("1111222233334444555000");
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var host = "https://api.celitech.net";
+                var iccid = "YOUR_iccid_PARAMETER";
+                var pathname = "/v1/esim/" + iccid + "/mac";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname ))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -3099,18 +3393,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.e_sim.get_esim_mac(iccid="1111222233334444555000")
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -3129,33 +3411,49 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
+        - source: >-
+            import { Celitech } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                  var Iccid = "YOUR_iccid_PARAMETER";
-                var request = await client.GetAsync("https://api.celitech.net/v1/esim/" + Iccid + "/mac");
-                var response = await request.Content.ReadAsStringAsync();
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              'https://api.celitech.net/v1/esim/{iccid}/mac' \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
+
+              const { data } = await celitech.eSim.getEsimMac('1111222233334444555000');
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->eSim->getEsimMac(
+              iccid: "1111222233334444555000"
+            );
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.e_sim.get_esim_mac(iccid="1111222233334444555000")
+
+            print(result)
+          lang: Python
+
   /iframe/token:
     post:
       summary: Generate Token
@@ -3164,7 +3462,7 @@ paths:
       tags:
         - iFrame
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
@@ -3175,7 +3473,7 @@ paths:
                     type: string
                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
                     description: The generated token
-        '400':
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -3186,7 +3484,7 @@ paths:
                     type: string
                     example: this is an example error message
                     description: Message of the error
-        '401':
+        "401":
           description: Unauthorized
           content:
             application/json:
@@ -3198,61 +3496,63 @@ paths:
                     example: this is an example error message
                     description: Message of the error
       x-codeSamples:
-        - source: |
-            import { Celitech } from 'celitech-sdk';
+        - lang: cURL
+          label: cURL
+          source: |
+            curl -i -X GET \
+              https://api.celitech.net/v1/iframe/token \
+              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+        - lang: C#
+          label: C#
+          source: >
+            using System;
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            using System.Net.Http;
 
-              const { data } = await celitech.iFrame.token();
+            using System.Threading.Tasks;
 
-              console.log(data);
-            })();
-          lang: JavaScript
-        - source: |-
-            import { Celitech } from 'celitech-sdk';
 
-            (async () => {
-              const celitech = new Celitech({
-                clientId: 'CLIENT_ID',
-                clientSecret: 'CLIENT_SECRET',
-              });
+            public class Program
 
-              const { data } = await celitech.iFrame.token();
+            {
+              private readonly IHttpClientFactory _httpClientFactory;
+              public static async Task Main(string[] args)
+              {
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
+                var request = await client.GetAsync("https://api.celitech.net/v1/iframe/token");
+                var response = await request.Content.ReadAsStringAsync();
 
-              console.log(data);
-            })();
-          lang: TypeScript
-        - source: |-
-            use Celitech\Client;
-
-            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret: 'CLIENT_SECRET');
-
-            $response = $sdk->iFrame->token();
-
-            print_r($response);
-          lang: PHP
-        - source: |-
-            import io.github.celitech.celitechsdk.Celitech;
-            import io.github.celitech.celitechsdk.config.CelitechConfig;
-            import io.github.celitech.celitechsdk.models.TokenOkResponse;
-
-            public class Main {
-
-              public static void main(String[] args) {
-                CelitechConfig config = CelitechConfig.builder().clientId("CLIENT_ID").clientSecret("CLIENT_SECRET").build();
-
-                Celitech celitech = new Celitech(config);
-
-                TokenOkResponse response = celitech.iFrame.token();
-
-                System.out.println(response);
+                Console.WriteLine(response);
               }
             }
-          lang: Java
+        - lang: Java
+          label: Java
+          source: >
+            import java.net.*;
+
+            import java.net.http.*;
+
+            import java.util.*;
+
+
+            public class App {
+              public static void main(String[] args) throws Exception {
+                var httpClient = HttpClient.newBuilder().build();
+
+                var host = "https://api.celitech.net";
+                var pathname = "/v1/iframe/token";
+                var request = HttpRequest.newBuilder()
+                  .GET()
+                  .uri(URI.create(host + pathname ))
+                  .header("Authorization", "Bearer <YOUR_TOKEN_HERE>")
+                  .build();
+
+                var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println(response.body());
+              }
+            }
         - lang: Go
           label: Go
           source: |
@@ -3275,18 +3575,6 @@ paths:
               fmt.Println(res)
               fmt.Println(string(body))
             }
-        - source: |-
-            from celitech import Celitech
-
-            sdk = Celitech(
-                client_id="CLIENT_ID",
-                client_secret="CLIENT_SECRET"
-            )
-
-            result = sdk.i_frame.token()
-
-            print(result)
-          lang: Python
         - lang: Ruby
           label: Ruby
           source: |
@@ -3304,41 +3592,65 @@ paths:
 
             response = http.request(request)
             puts response.read_body
-        - lang: C#
-          label: C#
-          source: |
-            using System;
-            using System.Net.Http;
-            using System.Threading.Tasks;
+        - source: |-
+            import { Celitech } from 'celitech-sdk';
 
-            public class Program
-            {
-              private readonly IHttpClientFactory _httpClientFactory;
-              public static async Task Main(string[] args)
-              {
-                var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer <YOUR_TOKEN_HERE>");
-                var request = await client.GetAsync("https://api.celitech.net/v1/iframe/token");
-                var response = await request.Content.ReadAsStringAsync();
+            (async () => {
+              const celitech = new Celitech({
+                clientId: 'CLIENT_ID',
+                clientSecret: 'CLIENT_SECRET',
+              });
 
-                Console.WriteLine(response);
-              }
-            }
-        - lang: cURL
-          label: cURL
-          source: |
-            curl -i -X GET \
-              https://api.celitech.net/v1/iframe/token \
-              -H 'Authorization: Bearer <YOUR_TOKEN_HERE>'
+              const { data } = await celitech.iframe.token();
+
+              console.log(data);
+            })();
+          lang: TypeScript
+        - source: >-
+            use Celitech\Client;
+
+
+            $sdk = new Client(clientId: 'CLIENT_ID', clientSecret:
+            'CLIENT_SECRET');
+
+
+            $response = $sdk->iframe->token();
+
+
+            print_r($response);
+          lang: PHP
+        - source: |-
+            from celitech import Celitech
+
+            sdk = Celitech(
+                client_id="CLIENT_ID",
+                client_secret="CLIENT_SECRET"
+            )
+
+            result = sdk.iframe.token()
+
+            print(result)
+          lang: Python
 tags:
   - name: Destinations
-    description: Destinations encapsulate the various countries & regions that CELITECH currently supports.
+    description: Destinations encapsulate the various countries & regions that
+      CELITECH currently supports.
   - name: eSIM
-    description: The eSIM endpoints encompass a wide range of functionalities related to the partner's owned eSIMs. This includes obtaining detailed information about eSIM devices, eSIM history, determining the current eSIM status, retrieving activation codes, and exploring various other attributes and actions associated with eSIM management.
+    description: The eSIM endpoints encompass a wide range of functionalities
+      related to the partner's owned eSIMs. This includes obtaining detailed
+      information about eSIM devices, eSIM history, determining the current eSIM
+      status, retrieving activation codes, and exploring various other
+      attributes and actions associated with eSIM management.
   - name: Packages
     description: The Packages endpoint focuses on the data packages offered by CELITECH.
   - name: Purchases
-    description: The Purchases endpoints offer extensive capabilities for managing eSIM purchases. Partners can utilize these endpoints to acquire new eSIMs, top-up an existing eSIM, list all existing purchases, update the activation period for future purchases, monitor the consumption and status of current purchases, and access other functionalities to support different purchasing workflows and requirements.
+    description:
+      The Purchases endpoints offer extensive capabilities for managing
+      eSIM purchases. Partners can utilize these endpoints to acquire new eSIMs,
+      top-up an existing eSIM, list all existing purchases, update the
+      activation period for future purchases, monitor the consumption and status
+      of current purchases, and access other functionalities to support
+      different purchasing workflows and requirements.
   - name: iFrame
     description: This endpoint helps generate a token required for securely embedding the iFrame, allowing partners to offer eSIM connectivity seamlessly on their websites and platforms.
 x-tagGroups:
